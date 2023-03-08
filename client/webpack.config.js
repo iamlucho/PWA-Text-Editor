@@ -15,14 +15,10 @@ module.exports = () => {
       path: path.resolve(__dirname, 'dist'),
     },
     plugins: [
+      // Webpack plugin that generates our html file and injects the bundles.
       new HtmlWebpackPlugin({
-        template: './index.html',
-        chunks: ['main'],
-      }),
-      new HtmlWebpackPlugin({
-        template: './install.html',
-        filename: 'install.html',
-        chunks: ['install'],
+        template: "./index.html",
+        title: "Text Editor",
       }),
       new WebpackPwaManifest({
         name: 'Text Editor',
