@@ -1,58 +1,73 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const WebpackPwaManifest = require('webpack-pwa-manifest');
-const path = require('path');
-const { InjectManifest } = require('workbox-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const WebpackPwaManifest = require("webpack-pwa-manifest");
+const path = require("path");
+const { InjectManifest } = require("workbox-webpack-plugin");
 
 module.exports = () => {
   return {
-    mode: 'development',
+    mode: "development",
     entry: {
-      main: './src/js/index.js',
-      install: './src/js/install.js'
+      main: "./src/js/index.js",
+      install: "./src/js/install.js",
     },
     output: {
-      filename: '[name].bundle.js',
-      path: path.resolve(__dirname, 'dist'),
+      filename: "[name].bundle.js",
+      path: path.resolve(__dirname, "dist"),
     },
     plugins: [
-      // Webpack plugin that generates our html file and injects the bundles.
+      // Webpack plugin that generates our html file and injects our bundles.
       new HtmlWebpackPlugin({
         template: "./index.html",
         title: "Text Editor",
       }),
+
+      // Injects our custom service worker
+      new InjectManifest({
+        swSrc: "./src-sw.js",
+        swDest: "src-sw.js",
+      }),
+
+      // Creates a manifest.json file.
       new WebpackPwaManifest({
-        name: 'Text Editor',
-        short_name: 'Editor',
-        description: 'PWA Challenge: Text Editor',
-        start_url: '/',
-        background_color: '#ffffff',
-        theme_color: '#007bff',
+        fingerprints: false,
+        inject: true,
+        name: "Text Editor",
+        short_name: "Editor",
+        description: "PWA Challenge: Text Editor",
+        background_color: "#ffffff",
+        theme_color: "#007bff",
+        start_url: "./",
+        publicPath: "./",
+        scope: "./",
         icons: [
           {
-            src: path.resolve('src/images/logo.png'),
+            src: path.resolve("src/images/logo.png"),
             sizes: [96, 128, 192, 256, 384, 512],
-            purpose: 'any maskable',
+            destination: path.join("assets", "icons"),
           },
         ],
       }),
-      new InjectManifest({
-        swSrc: './src-sw.js',
-        swDest: 'src-sw.js',
-      }),
     ],
+
     module: {
+      // CSS loaders
       rules: [
         {
-          test: /\.css$/,
-          use: ['style-loader', 'css-loader'],
+          test: /\.css$/i,
+          use: ["style-loader", "css-loader"],
         },
         {
-          test: /\.js$/,
-          exclude: /node_modules/,
+          test: /\.m?js$/,
+          exclude: /(node_modules|bower_components)/,
+          // We use babel-loader in order to use ES6.
           use: {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
-              presets: ['@babel/preset-env'],
+              presets: ["@babel/preset-env"],
+              plugins: [
+                "@babel/plugin-proposal-object-rest-spread",
+                "@babel/transform-runtime",
+              ],
             },
           },
         },
